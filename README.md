@@ -1,9 +1,11 @@
 # Sharetea POS code documentation
 
 Generated Javadoc for the CSCE 331 Sharetea POS project, including private members
-and author tags. Documentation snapshot: October 16, 2026.
+and author tags. Documentation snapshot: October 20, 2026.
 
-Source revision: `8eae2a5` (the team repository's published main branch).
+Source revision: `1c4109e` on the team repository's `humaid/complete-javadocs` branch.
+Includes all main and test Java sources and private members.
+Validated with `-private -author -Xdoclint:all -Werror`: zero warnings.
 This repository contains generated documentation only, not Java source files,
 credentials, or database contents.
 
