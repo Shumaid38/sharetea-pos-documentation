@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Sharetea Node.js + Express + PostgreSQL lab</h1>
+<p>Author: <strong>Humaid Syed</strong></p>
+<p>This read-only Express application connects to the existing Sharetea PostgreSQL
+database through <code>pg</code>. It renders the menu with EJS, filters by category using a
+parameterized query, and exposes live connection evidence at <code>/api/health</code>.
+It does not create tables, seed data, or change orders or inventory.</p>
+<h2>Run the application</h2>
+<p>Use Node.js 22 or newer. From the project root:</p>
+<pre class="prettyprint source lang-bash"><code>cd web-lab
+npm ci
+cp .env.example .env
+</code></pre>
+<p>Skip the copy step if <code>.env</code> is already configured. Edit <code>.env</code> locally with your
+database host, port, name, user, and password. Do not paste the password into source
+code or the terminal command line. <code>src/config.js</code> loads this file regardless of
+the working directory. Exported environment variables take precedence.</p>
+<p>For the class AWS RDS database, obtain the public CA bundle from AWS:</p>
+<pre class="prettyprint source lang-bash"><code>mkdir -p .certs
+curl --fail --silent --show-error \
+  https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem \
+  -o .certs/rds-us-east-1.pem
+</code></pre>
+<p>Set <code>DB_SSL=true</code> and <code>DB_SSL_CA</code> to the absolute path of that file. Use the
+canonical RDS hostname supplied for the class database: the classroom DNS alias
+may not match the certificate. On macOS, <code>dig +short &lt;class-database-host&gt;</code> shows
+the canonical name. Verify the endpoint with your course information. Certificate
+verification remains enabled. For a local PostgreSQL instance without TLS,
+explicitly use <code>DB_SSL=false</code>.</p>
+<pre class="prettyprint source lang-bash"><code>npm run check:db
+npm start
+</code></pre>
+<p>Open <a href="http:%5C/%5C/127.0.0.1:3000">http://127.0.0.1:3000</a>. The page shows the database name, server time, menu
+count, TLS status, and menu rows returned by PostgreSQL. Select a category and
+click <strong>Show menu</strong>. Stop with Ctrl+C; the server closes its connection pool.
+The server binds to this computer's loopback interface for the lab demo.</p>
+<h2>Evidence to show the TA</h2>
+<ol>
+<li>
+<p>Run <code>npm run check:db</code>, then <code>npm start</code> and open the menu page. Explain that
+Express handles the request, <code>pg</code> executes SQL, and EJS renders the result.
+Open <a href="http:%5C/%5C/127.0.0.1:3000/api/health">http://127.0.0.1:3000/api/health</a> to show a live query rather than a
+hardcoded connection message. A failed database query returns HTTP 503.</p>
+</li>
+<li>
+<p>From the repository root, run:</p>
+<pre class="prettyprint source lang-bash"><code>git check-ignore -v web-lab/.env web-lab/node_modules/ web-lab/docs/ web-lab/.certs/
+git ls-files web-lab/.env
+git status --short --untracked-files=all web-lab
+</code></pre>
+<p>The first command identifies the ignore rules. The second must print nothing:
+the credential file is not tracked. Show <code>.env.example</code> instead of <code>.env</code>.
+Commit the connection <strong>code</strong>, example configuration, <code>package.json</code>, and
+<code>package-lock.json</code>; ignore actual credentials, installed dependencies, local
+certificates, and generated documentation in this source repository.</p>
+</li>
+<li>
+<p>Open the publicly hosted documentation:</p>
+<ul>
+<li><a href="https://shumaid38.github.io/sharetea-pos-documentation/node-express/">Node.js/Express API documentation</a></li>
+<li><a href="https://shumaid38.github.io/sharetea-pos-documentation/">Java POS Javadoc</a></li>
+</ul>
+<p>Show the documented modules and Humaid Syed author tags. These are static
+GitHub Pages documents; the Express app and database credentials stay local.
+The TA still needs to observe your demonstration to give the checkoff.</p>
+</li>
+</ol>
+<h2>Validation and documentation</h2>
+<pre class="prettyprint source lang-bash"><code>npm test
+npm run check:db
+npm run docs
+</code></pre>
+<p><code>npm test</code> uses test doubles and makes no database connections. It covers query
+parameter binding, HTML escaping, invalid input, database failures, configuration,
+and empty results. <code>check:db</code> is the separate live database verification.</p>
+<p>JSDoc generates <code>docs/index.html</code> from the source comments and this guide.
+Published documentation is a snapshot: regenerate and copy <code>docs/</code> into the
+documentation repository's <code>node-express/</code> directory to update it. The JSDoc
+configuration omits source-file listings. Never copy <code>.env</code>, <code>.certs</code>, or database
+query results into the public documentation repository.</p>
+<h2>Files and behavior</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/config.js</code></td>
+<td>Load and validate environment variables and TLS options</td>
+</tr>
+<tr>
+<td><code>src/db.js</code></td>
+<td>Create a bounded pool; query connection evidence, menu, and categories</td>
+</tr>
+<tr>
+<td><code>src/app.js</code></td>
+<td>Express routes, input validation, rendering, and safe errors</td>
+</tr>
+<tr>
+<td><code>src/server.js</code></td>
+<td>Listen locally and close connections on shutdown</td>
+</tr>
+<tr>
+<td><code>src/check-db.js</code></td>
+<td>Run a real SQL query from the terminal</td>
+</tr>
+<tr>
+<td><code>views/index.ejs</code></td>
+<td>Escape database text and render the menu</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>Share configuration names without credentials</td>
+</tr>
+</tbody>
+</table>
+<p>The existing table must include <code>menu_item(item_id, name, price, category, availability_status)</code>. No employee information or order history is exposed.
+Connections request PostgreSQL's read-only transaction default and use bounded
+connection and query timeouts. There is no authentication; keep the demo local.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://expressjs.com/en/guide/error-handling/">Express asynchronous error handling</a></li>
+<li><a href="https://node-postgres.com/features/ssl">node-postgres TLS configuration</a></li>
+<li><a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html">AWS RDS certificate bundles</a></li>
+</ul></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-check-db.html">check-db</a></li><li><a href="module-config.html">config</a></li><li><a href="module-db.html">db</a></li><li><a href="module-server.html">server</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue Oct 20 2026 15:48:50 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
